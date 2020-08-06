@@ -1,116 +1,96 @@
 #include<bits/stdc++.h>
 using namespace std;
+
 #define mx 100005
+#define ll long long 
+
 
 vector<int>g[mx];
-set<pair<int,int>>vv;
-vector<int>v;
+int st[mx],en[mx],id[mx];
 bool ans[mx];
-int st[mx],en[mx];
-int n,y,cnt;
+set<pair<int,int>>s;
+int m,n,k,ii,dek;
+int tt=1;
 
-
-bool cmp(int a,int b)
+void dfs(int u,int par)
 {
-    return en[a]<en[b];
+	st[u]=tt++;
+	for(int v:g[u])
+	{
+		if(v==par)continue;
+		dfs(v,u);
+	}
+	en[u]=tt++;
+	s.insert({en[u],u});
 }
 
-void dfs(int u,int p)
+void solve()
 {
-    st[u]=cnt++;
-    for(auto it:g[u])
-    {
-        if(it!=p)
-        {
-            v.push_back(it);
-            dfs(it,u);
+	scanf("%d",&n);
+	for(int i=1;i<n;i++)
+	{
+		int x,y;
+		scanf("%d%d",&x,&y);
+		g[x].push_back(y);
+		g[y].push_back(x);
+	}
+	for(int i=1;i<=n;i++)sort(g[i].begin(),g[i].end());
+	tt=1;
+	dfs(1,-1);
+	printf("Case %d:\n",++ii );
+	int q;
+	scanf("%d",&q);
+	while(q--)
+	{
+		int ti,u;
+		scanf("%d%d",&ti,&u);
+		if(ti==2)
+		{
+			if(ans[u]==0)printf("0\n");
+			else printf("1\n");
+		}
+		else
+		{
+			int x;
+			scanf("%d",&x);
+			if(ans[u]==true || x==0)continue;
 
-        }
-    }
-    en[u]=cnt++;
-}
-
-void solve(int ii)
-{
-    cnt=1;
-    for(int i=1; i<=n; i++)
-    {
-        st[i]=0;
-        en[i]=0;
-        ans[i]=false;
-        g[i].clear();
-    }
-
-    v.clear();
-    vv.clear();
-
-    scanf("%d",&n);
-    for(int i=1; i<n; i++)
-    {
-        int x,y;
-        scanf("%d%d",&x,&y);
-        g[x].push_back(y);
-        g[y].push_back(x);
-    }
-    for(int i=1; i<=n; i++)
-        sort(g[i].begin(),g[i].end());
-
-    dfs(1,-1);
-
-    v.push_back(1);
-    sort(v.begin(),v.end(),cmp);
-
-    for(int i=0; i<v.size(); i++)
-    {
-        vv.insert({en[v[i]],v[i]});
-    }
-
-    int q;
-    scanf("%d",&q);
-    printf("Case %d:\n",ii);
-    while(q--)
-    {
-        int ty,x;
-        scanf("%d%d",&ty,&x);
-        if(ty==1)
-        {
-            scanf("%d",&y);
-            if(ans[x]==false && y)
+			int val=st[u];
+			auto idx=s.upper_bound({val,n+1});
+			auto it=idx;
+            while(x>0)
             {
-                pair<int,int>tem= {st[x],n+1};
-
-                auto it=vv.upper_bound(tem);
-                auto it1=it;
-
-                while(y)
-                {
-                    pair<int,int>itt=*it;
-                    //cout<<itt.first<<" "<<itt.second<<endl;
-                    y--;
-                    ans[itt.second]=true;
-                    it++;
-                    if(itt.second==x)break;
-                }
-                //it--;
-                vv.erase(it1,it);
+                 int sesh=idx->first;
+                 ans[idx->second]=1;
+                 idx++;
+                 if(sesh==en[u])break;
+                 x--;
 
             }
+            s.erase(it,idx);
+		}
 
-        }
-        else
-        {
-            if(ans[x])
-                printf("1\n");
-            else
-                printf("0\n");
-        }
-    }
+	}
+	for(int i=1;i<=n;i++)
+	{
+		g[i].clear();
+		ans[i]=false;
+		id[i]=0;
+	}
+	s.clear();
 }
+
 int main()
 {
-    int t=1;
-    scanf("%d",&t);
-    for(int i=1; i<=t; i++)
-        solve(i);
-    return 0;
+	// #ifndef ONLINE_JUDGE
+	// freopen("in.txt","r",stdin);
+	// freopen("out.txt","w",stdout);
+	// #endif
+	int t=1;
+	scanf("%d",&t);
+	while(t--)
+	{
+		solve();
+	}
+	return 0;
 }
