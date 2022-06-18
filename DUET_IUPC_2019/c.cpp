@@ -3,29 +3,31 @@ using namespace std;
 
 #define mx 100005
 #define ll long long
-#define mod 1000000007
+#define mod 10000
 
 int ar[mx];
 ll have[(1<<20)+5];
-int n,m,ii,k;
-bool dp[(1<<20)+5];
-vector<pair<ll,int>>ans[21];
-ll weight[1<<20+5];
-///int id= __builtin_ctz(mask); its give the position of the first one from the left
-/// int tot= __builtin_popcount(mask); number of one bit .
-int Set(int N,int pos)
-{
-    return N=N|(1<<pos);
-}
+ll ans_val[25];
 
-int Reset(int N,int pos)
-{
-    return N=N & ~(1<<pos);
-}
+int n,m,ii,k;
+
+bool dp[(1<<20)+5];
+vector<int>ans[21];
+ll weight[1<<20+5];
+
 
 bool chk(int N,int pos)
 {
     return (bool)(N &(1<<pos));
+}
+
+
+int mul(int a,int b)
+{
+    ll re=a;
+    re*=b;
+    if(re>=mod)re%=mod;
+    return re;
 }
 
 
@@ -35,13 +37,14 @@ void solve()
     int seed;
     scanf("%d%d%d",&n,&m,&seed);
     ii++;
+    memset(ans_val,-1,sizeof(ans_val));
 
     for(int i=0;i<(1<<n);i++){
         dp[i]=0;
         have[i]=0;
 
         if(i==0)weight[i]=1;
-        else weight[i]=weight[i-1]*seed%10000;
+        else weight[i]=mul(weight[i-1],seed);
     }
 
     for(int i=1;i<=m;i++)
@@ -71,10 +74,19 @@ void solve()
         {
             if(chk(i,j))
             {
-                ans[j+1].emplace_back(weight[i]*have[i],i);
+                ll cur=weight[i]*have[i];
+
+                if(ans_val[j+1]<cur)
+                {
+                    ans_val[j+1]=cur;
+                    ans[j+1].clear();
+                    ans[j+1].push_back(i);
+                }
+                else if(ans_val[j+1]==cur)ans[j+1].push_back(i);
             }
         }
     }
+
     printf("Case %d:\n",ii );
     for(int i=1;i<=n;i++)
     {
@@ -85,18 +97,10 @@ void solve()
         else
         {
             sort(ans[i].begin(),ans[i].end());
-            auto it=ans[i].back();
-            vector<int>re;
-            re.emplace_back(it.second);
-            ans[i].pop_back();
-            while(!ans[i].empty() and ans[i].back().first==it.first)
-            {
-                re.emplace_back(ans[i].back().second);
-                ans[i].pop_back();
-            }
-            printf("%lld",it.first);
-            sort(re.begin(),re.end());
-            for(int mask:re)printf(" %d",mask);
+            printf("%lld",ans_val[i]);
+            
+            for(int mask:ans[i])printf(" %d",mask);
+
             printf("\n");
 
         }
