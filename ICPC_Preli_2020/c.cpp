@@ -12,7 +12,7 @@ typedef tree<int, null_type, less<int>, rb_tree_tag, tree_order_statistics_node_
  
 #define mx 200105
 #define ll long long
-#define mod 1499977 //998244353
+#define mod 1000003 //998244353
 #define base 31
 int inv[mod+5];
 
@@ -92,25 +92,21 @@ void update(int node,int be,int en,int pos){
     Tree[node][1]=add(Tree[node*2][1],Tree[node*2+1][1]);
 }
 
-int queryl(int node,int be,int en,int l,int r){
-    if(be>=l and en<=r)return Tree[node][0];
-    if(be>r or en<l)return 0;
-    int mid=(be+en)/2;
-    return add(queryl(node*2,be,mid,l,r),queryl(node*2+1,mid+1,en,l,r));
-}
 
-
-int queryr(int node,int be,int en,int l,int r){
-    if(be>=l and en<=r)return Tree[node][1];
-    if(be>r or en<l)return 0;
+pair<int,int> query(int node,int be,int en,int l,int r){
+    if(be>=l and en<=r)return {Tree[node][0],Tree[node][1]};
+    if(be>r or en<l)return {0,0};
     int mid=(be+en)/2;
-    return add(queryr(node*2,be,mid,l,r),queryr(node*2+1,mid+1,en,l,r));
+    pair<int,int>a=query(node*2,be,mid,l,r);
+    pair<int,int>b=query(node*2+1,mid+1,en,l,r);
+    return {add(a.first,b.first),add(a.second,b.second)};
 }
+ordered_set s[27];
 
 void solve()
 {
     scanf("%s",ch);
-    ordered_set s[27];
+    
     n=strlen(ch);
 
     init(1,1,n);
@@ -131,8 +127,10 @@ void solve()
             int y;
             scanf("%d",&y);
 
-            int samne=divi(queryl(1,1,n,x,y),P[x]);
-            int piche=divi(queryr(1,1,n,x,y),P[n-y+1]);
+            pair<int,int>a=query(1,1,n,x,y);
+
+            int samne=divi(a.first,P[x]);
+            int piche=divi(a.second,P[n-y+1]);
 
             if(samne==piche){
                 printf("0\n");
@@ -140,15 +138,17 @@ void solve()
             }
 
             if(ch[x-1]!=ch[y-1]){
-                samne=divi(queryl(1,1,n,x+1,y),P[x+1]);
-                piche=divi(queryr(1,1,n,x+1,y),P[n-y+1]);
+                a=query(1,1,n,x+1,y);
+                samne=divi(a.first,P[x+1]);
+                piche=divi(a.second,P[n-y+1]);
                 
                 if(samne==piche){
                     printf("%d\n",x);
                     continue;
                 }
-                samne=divi(queryl(1,1,n,x,y-1),P[x]);
-                piche=divi(queryr(1,1,n,x,y-1),P[n-y+2]);
+                a=query(1,1,n,x,y-1);
+                samne=divi(a.first,P[x]);
+                piche=divi(a.second,P[n-y+2]);
               
                 if(samne==piche){
                     printf("%d\n",y);
@@ -161,13 +161,15 @@ void solve()
                 }
             }
 
-            int be=1,en=y-x;
+            int be=1,en=(y-x+2)/2;
             int got=1;
 
             while(be<=en){
                 int mid=(be+en)/2;
-                samne=divi(queryl(1,1,n,x,x+mid),P[x]);
-                piche=divi(queryr(1,1,n,y-mid,y),P[n-y+1]);
+                a=query(1,1,n,x,x+mid);
+                pair<int,int>b=query(1,1,n,y-mid,y);
+                samne=divi(a.first,P[x]);
+                piche=divi(b.second,P[n-y+1]);
                 if(samne==piche){
                     got=mid+1;
                     be=mid+1;
@@ -181,15 +183,15 @@ void solve()
 
 
             int del=x+got;
-            samne=divi(queryl(1,1,n,del+1,y-got),P[del+1]);
-            piche=divi(queryr(1,1,n,del+1,y-got),P[n-y+got+1]);
 
-            
+            a=query(1,1,n,del+1,y-got);
 
-            
+            samne=divi(a.first,P[del+1]);
+            piche=divi(a.second,P[n-y+got+1]);
+
         
             if(samne==piche){
-                
+
                 int val=ch[del-1]-'a';
 
                 be=s[val].order_of_key(x)+1,en=s[val].order_of_key(del);
@@ -216,8 +218,10 @@ void solve()
                 continue;
             }
 
-            samne=divi(queryl(1,1,n,del,y-got-1),P[del]);
-            piche=divi(queryr(1,1,n,del,y-got-1),P[n-y+got+2]);
+            a=query(1,1,n,del,y-got-1);
+
+            samne=divi(a.first,P[del]);
+            piche=divi(a.second,P[n-y+got+2]);
 
             if(samne==piche){
                 printf("%d\n",y-got);
@@ -233,14 +237,14 @@ void solve()
             char c;
             scanf(" %c",&c);
             int val=ch[x-1]-'a';
-            s[val].erase(s[val].find(x));
+            s[val].erase(x);
             ch[x-1]=c;
             s[c-'a'].insert(x);
             update(1,1,n,x);
         }
     }
 
- 
+    for(int i=0;i<26;i++)s[i].clear();
 }
 /*
 
