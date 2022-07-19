@@ -10,10 +10,10 @@ using namespace __gnu_pbds;
 typedef tree<int, null_type, less<int>, rb_tree_tag, tree_order_statistics_node_update> ordered_set;
 
  
-#define mx 200005
+#define mx 200105
 #define ll long long
-#define mod 1000000007 //998244353
-#define base 998244353
+#define mod 100000007 //998244353
+#define base 31
 
 ll bigmod(ll e,ll x)
 {
@@ -159,7 +159,7 @@ void solve()
                 }
             }
 
-            int be=1,en=(y-x+2)/2;
+            int be=1,en=y-x;
             int got=1;
 
             while(be<=en){
@@ -177,10 +177,10 @@ void solve()
             //cout<<got<<endl;
 
             int del=x+got;
-            //cout<<del<<endl;
             int val=ch[del-1]-'a';
 
-            be=1,en=s[val].order_of_key(del);
+            be=s[val].order_of_key(x)+1,en=s[val].order_of_key(del);
+            int have=en;
 
             int back=0;
 
@@ -192,17 +192,17 @@ void solve()
                     continue;
                 }
                 int gap=del-idx;
-                if(gap==mid){
-                    back=mid;
+                int pres=have-mid+1;
+                if(gap==pres){
+                    back=gap;
                     en=mid-1;
                 }
                 else be=mid+1;
             }
-           // cout<<back<<endl;
+
             samne=divi(queryl(1,1,n,del+1,y-got),P[del+1]);
             piche=divi(queryr(1,1,n,del+1,y-got),P[n-y+got+1]);
-           // cout<<del+1<<" "<<y-got<<endl;
-          //  cout<<queryl(1,1,n,del+1,y-got)<<" "<<samne<<endl;
+        
             if(samne==piche){
                 printf("%d\n",del-back);
                 continue;
@@ -215,7 +215,7 @@ void solve()
                 printf("%d\n",y-got);
                 continue;
             }
-            
+
             printf("-1\n");
 
 
