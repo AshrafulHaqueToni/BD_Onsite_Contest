@@ -12,8 +12,9 @@ typedef tree<int, null_type, less<int>, rb_tree_tag, tree_order_statistics_node_
  
 #define mx 200105
 #define ll long long
-#define mod 100000007 //998244353
+#define mod 1499977 //998244353
 #define base 31
+int inv[mod+5];
 
 ll bigmod(ll e,ll x)
 {
@@ -54,11 +55,12 @@ int mul(int a,int b)
 }
 
 int divi(int a,int b){
-    return mul(a,bigmod(b,mod-2));
+    return mul(a,inv[b]);
 }
 void pre(){
     P[mx-5]=1;
     for(int i=mx-6;i>=1;i--)P[i]=mul(base,P[i+1]);
+    for(int i=0;i<mod;i++)inv[i]=bigmod(i,mod-2);
 }
 
 int Tree[mx*4][2];
@@ -176,34 +178,40 @@ void solve()
             }
             //cout<<got<<endl;
 
+
+
             int del=x+got;
-            int val=ch[del-1]-'a';
-
-            be=s[val].order_of_key(x)+1,en=s[val].order_of_key(del);
-            int have=en;
-
-            int back=0;
-
-            while(be<=en){
-                int mid=(be+en)/2;
-                int idx=*s[val].find_by_order(mid-1);
-                if(idx<x){
-                    be=mid+1;
-                    continue;
-                }
-                int gap=del-idx;
-                int pres=have-mid+1;
-                if(gap==pres){
-                    back=gap;
-                    en=mid-1;
-                }
-                else be=mid+1;
-            }
-
             samne=divi(queryl(1,1,n,del+1,y-got),P[del+1]);
             piche=divi(queryr(1,1,n,del+1,y-got),P[n-y+got+1]);
+
+            
+
+            
         
             if(samne==piche){
+                
+                int val=ch[del-1]-'a';
+
+                be=s[val].order_of_key(x)+1,en=s[val].order_of_key(del);
+                int have=en;
+
+                int back=0;
+
+                while(be<=en){
+                    int mid=(be+en)/2;
+                    int idx=*s[val].find_by_order(mid-1);
+                    if(idx<x){
+                        be=mid+1;
+                        continue;
+                    }
+                    int gap=del-idx;
+                    int pres=have-mid+1;
+                    if(gap==pres){
+                        back=gap;
+                        en=mid-1;
+                    }
+                    else be=mid+1;
+                }
                 printf("%d\n",del-back);
                 continue;
             }
