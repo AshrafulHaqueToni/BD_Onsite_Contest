@@ -3,11 +3,6 @@
 #include<bits/stdc++.h>
 using namespace std;
 
-#include <ext/pb_ds/assoc_container.hpp>
-#include <ext/pb_ds/tree_policy.hpp> 
-using namespace __gnu_pbds;
-
-typedef tree<int, null_type, less<int>, rb_tree_tag, tree_order_statistics_node_update> ordered_set;
 
  
 #define mx 200105
@@ -101,7 +96,7 @@ pair<int,int> query(int node,int be,int en,int l,int r){
     pair<int,int>b=query(node*2+1,mid+1,en,l,r);
     return {add(a.first,b.first),add(a.second,b.second)};
 }
-ordered_set s[27];
+
 
 void solve()
 {
@@ -110,9 +105,15 @@ void solve()
     n=strlen(ch);
 
     init(1,1,n);
+
+    int last=-1;
+    set<int>s;
     
     for(int i=1;i<=n;i++){
-        s[ch[i-1]-'a'].insert(i);
+        int val=ch[i-1]-'a';
+        if(val==last)continue;
+        s.insert(i);
+        last=val;
     }
 
     int q;
@@ -192,29 +193,11 @@ void solve()
         
             if(samne==piche){
 
-                int val=ch[del-1]-'a';
+                auto it=s.lower_bound(del);
+                if(*it>del)it--;
+                int back=*it;
 
-                be=s[val].order_of_key(x)+1,en=s[val].order_of_key(del);
-                int have=en;
-
-                int back=0;
-
-                while(be<=en){
-                    int mid=(be+en)/2;
-                    int idx=*s[val].find_by_order(mid-1);
-                    if(idx<x){
-                        be=mid+1;
-                        continue;
-                    }
-                    int gap=del-idx;
-                    int pres=have-mid+1;
-                    if(gap==pres){
-                        back=gap;
-                        en=mid-1;
-                    }
-                    else be=mid+1;
-                }
-                printf("%d\n",del-back);
+                printf("%d\n",max(x,back));
                 continue;
             }
 
@@ -236,18 +219,17 @@ void solve()
         {
             char c;
             scanf(" %c",&c);
-            int val=ch[x-1]-'a';
-            s[val].erase(x);
+            auto it=s.find(x);
+            if(it!=s.end())s.erase(it);
+            if(x<n)s.insert(x+1);
             ch[x-1]=c;
-            s[c-'a'].insert(x);
+            if(x<n and ch[x]==ch[x-1])s.erase(s.find(x+1));
+            if(x==1 or ch[x-1]!=ch[x-2])s.insert(x);
             update(1,1,n,x);
         }
     }
-
-    for(int i=0;i<26;i++)s[i].clear();
 }
 /*
-
 1
 abcccba
 3
@@ -264,3 +246,4 @@ int main()
     while(t--)solve();
     return 0;
 }
+
