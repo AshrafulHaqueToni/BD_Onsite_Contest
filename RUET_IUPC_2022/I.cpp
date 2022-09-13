@@ -7,8 +7,8 @@ using namespace std;
 #define ll long long
 #define mod 1000000007 //998244353
  
-bool dp[mx][2005][mx];
-int vis[mx][2005][mx];
+bool dp[mx][2005][mx+mx];
+int vis[mx][2005][mx+mx];
 pair<int,int>p[11][11];
 char ch[mx];
 int n,m,ii,k;
