@@ -9,6 +9,7 @@ using namespace std;
  
 bool dp[mx][2005][mx];
 int vis[mx][2005][mx];
+pair<int,int>p[11][11];
 char ch[mx];
 int n,m,ii,k;
 
@@ -23,17 +24,9 @@ bool func(int pos,int stick,int move){
     if(vis[pos][stick][move]==ii)return dp[pos][stick][move];
     vis[pos][stick][move]=ii;
     bool re=false;
+    int val=ch[pos]-'0';
     for(int i=9;i>=0;i--){
-        int need_mov=0;
-        int val=ch[pos]-'0';
-        int need=0;
-
-        for(int j=0;j<7;j++){
-            if(digit[val][j]==digit[i][j])continue;
-            need+=digit[i][j];
-            need-=digit[val][j];
-            need_mov++;
-        }
+        auto[need,need_mov]=p[i][val];
         re|=func(pos+1,stick+need,move-need_mov);
         if(re)return dp[pos][stick][move]=true;
     }
@@ -46,9 +39,8 @@ void solve()
     n=strlen(ch);
     printf("Case %d:\n",++ii);
     while(m--){
+        
        scanf("%d",&k);
-       func(0,1000,k+k);
-
        int stick=1000;
        int move=k+k;
 
@@ -58,15 +50,7 @@ void solve()
 
           for(int i=9;i>=0;i--){
 
-            int need_mov=0;
-            int need=0;
-
-            for(int j=0;j<7;j++){
-                if(digit[val][j]==digit[i][j])continue;
-                need+=digit[i][j];
-                need-=digit[val][j];
-                need_mov++;
-            }
+            auto[need,need_mov]=p[i][val];
 
             if(func(pos+1,stick+need,move-need_mov)){
                 printf("%d",i);
@@ -88,6 +72,22 @@ void solve()
 int main()
 {
     int t=1;
+
+    for(int i=0;i<10;i++){
+        for(int j=0;j<10;j++){
+            int need_mov=0;
+            int need=0;
+
+            for(int l=0;l<7;l++){
+                if(digit[i][l]==digit[j][l])continue;
+                need+=digit[i][l];
+                need-=digit[j][l];
+                need_mov++;
+            }
+            p[i][j]={need,need_mov};
+        }
+    }
+
     scanf("%d",&t);
     while(t--)solve();
     return 0;
