@@ -49,8 +49,15 @@ void solve()
         dist[i][i]=0;
         for(int j=i-1;j>=2;j--){
             int be=j,en=i;
-            ll val=1e18;
-            while(be<=en){
+            int mid=(en+be+1)/2;
+            ll val=distl[mid][j]+distr[mid][i];
+            if(mid>j){
+                val=min(val,distl[mid-1][j]+distr[mid-1][i]);
+            }
+            if(mid<i){
+                val=min(val,distl[mid+1][j]+distr[mid+1][i]);
+            }
+           /* while(be<=en){
                 int mid1=(be+be+en)/3;
                 int mid2=(be+en+en)/3;
                 ll d1=distl[mid1][j]+distr[mid1][i];
@@ -64,7 +71,7 @@ void solve()
                     val=min(val,d1);
                     en=mid2-1;
                 }
-            }
+            }*/
            // cout<<i<<" "<<j<<" "<<val<<endl;
             dist[j][i]=val;
         }
