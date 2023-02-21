@@ -44,44 +44,47 @@ void decompose(int u,int par)
     for(int v:g[tem])
         if(v!=par && !vis[v])decompose(v,tem);
 }
-priority_queue<pair<pair<int,ll>,int>>re[mx];
+set<pair<pair<int,ll>,int>>re[mx];
 
 void update(int u,ll tm)
 {
    // cout<<u<<" "<<tm<<endl;
     for(int v=u;v!=-1;v=p[v]){
-        re[v].push({{-dis[lvl[v]][u],-tm},u});
+        re[v].insert({{dis[lvl[v]][u],tm},u});
     }
 }
+
 pair<ll,int> query(int u,ll tm)
 {
     int ans=-1,d=-1;
     ll req=-1;
     for(int v=u;v!=-1;v=p[v]){
-        while(!re[v].empty() and active[re[v].top().second]==0)re[v].pop();
         if(!re[v].empty()){
-            auto[it,node]=re[v].top();
+            auto[it,node]=*re[v].begin();
             if(ans==-1){
                 ans=node;
-                d=-it.first+dis[lvl[v]][u];
-                req=-it.second;
+                d=it.first+dis[lvl[v]][u];
+                req=it.second;
             }
-            else if(d>-it.first+dis[lvl[v]][u]){
+            else if(d>it.first+dis[lvl[v]][u]){
                 ans=node;
-                d=-it.first+dis[lvl[v]][u];
-                req=-it.second;
+                d=it.first+dis[lvl[v]][u];
+                req=it.second;
             }
-            else if(d==-it.first+dis[lvl[v]][u]){
-                if(-it.second<req){
+            else if(d==it.first+dis[lvl[v]][u]){
+                if(it.second<req){
                     ans=node;
-                    d=-it.first+dis[lvl[v]][u];
-                    req=-it.second;
+                    d=it.first+dis[lvl[v]][u];
+                    req=it.second;
                 }
             }
         }
     }
     active[ans]=0;
 
+    for(int v=ans;v!=-1;v=p[v]){
+        re[v].erase(re[v].find({{dis[lvl[v]][ans],req},ans}));
+    }
     return {max(tm+d,req+d),ans};
 }
 
@@ -110,7 +113,7 @@ void solve()
     ll somoy=0;
     int i=0;
     int available=0;
-    while(i<q){
+    while(i<q or available>0){
         while(i<q and somoy>=v[i].first){
             update(v[i].second,v[i].first);
             active[v[i].second]=1;
@@ -124,7 +127,7 @@ void solve()
             available++;
         }
         if(available==0)break;
-        while(available){
+        if(available){
             pair<ll,int>a=query(cur_node,somoy);
             cur_node=a.second;
             somoy=a.first;
@@ -136,13 +139,13 @@ void solve()
 
     for(i=1;i<=n;i++){
         active[i]=0;
-        while(!re[i].empty())re[i].pop();
+        re[i].clear();
         g[i].clear();
         ng[i].clear();
         vis[i]=0;
         sub[i]=0;
         p[i]=0;
-        for(int j=0;j<17;j++)dis[j][i]=0;
+        for(int j=0;j<18;j++)dis[j][i]=0;
         lvl[i]=0;
     }
 }
