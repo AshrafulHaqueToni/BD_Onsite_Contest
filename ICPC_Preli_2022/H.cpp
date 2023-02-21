@@ -7,7 +7,7 @@ using namespace std;
 
 int dis[18][mx],vis[mx];
 int p[mx],sub[mx],lvl[mx];
-vector<int>g[mx],ng[mx];
+vector<int>g[mx];
 bool active[mx];
 
 /* p[u] = parent of u in centroid tree
@@ -39,53 +39,57 @@ void decompose(int u,int par)
     pre_cal(u,-1);
     int tem=centroid(u,-1,sub[u]>>1);
     vis[tem]=1,p[tem]=par,lvl[tem]=0;
-    if(par!=-1)lvl[tem]=lvl[par]+1,ng[par].push_back(tem);
+    if(par!=-1)lvl[tem]=lvl[par]+1;
     dfs(lvl[tem],tem,-1);
     for(int v:g[tem])
         if(v!=par && !vis[v])decompose(v,tem);
 }
-set<pair<pair<int,ll>,int>>re[mx];
+priority_queue<pair<int,int>>re[mx];
+ll memo[mx];
+int ar[mx];
 
-void update(int u,ll tm)
+void update(int u,int tm)
 {
-   // cout<<u<<" "<<tm<<endl;
     for(int v=u;v!=-1;v=p[v]){
-        re[v].insert({{dis[lvl[v]][u],tm},u});
+        while(!re[v].empty() and active[ar[-re[v].top().second]]==0)re[v].pop();
+        re[v].push({-dis[lvl[v]][u],-tm});
     }
 }
 
-pair<ll,int> query(int u,ll tm)
+int cur_node;
+ll somoy;
+
+void query(int u)
 {
-    int ans=-1,d=-1;
-    ll req=-1;
+    int d=-1,req=-1;
     for(int v=u;v!=-1;v=p[v]){
+        while(!re[v].empty() and active[ar[-re[v].top().second]]==0)re[v].pop();
         if(!re[v].empty()){
-            auto[it,node]=*re[v].begin();
-            if(ans==-1){
-                ans=node;
-                d=it.first+dis[lvl[v]][u];
-                req=it.second;
+            auto[dd,id]=re[v].top();
+            dd*=-1;
+            id*=-1;
+            int d_path=dd+dis[lvl[v]][u];
+            if(req==-1){
+                d=d_path;
+                req=id;
             }
-            else if(d>it.first+dis[lvl[v]][u]){
-                ans=node;
-                d=it.first+dis[lvl[v]][u];
-                req=it.second;
+            else if(d>d_path){
+                d=d_path;
+                req=id;
             }
-            else if(d==it.first+dis[lvl[v]][u]){
-                if(it.second<req){
-                    ans=node;
-                    d=it.first+dis[lvl[v]][u];
-                    req=it.second;
+            else if(d==d_path){
+                if(id<req){
+                    d=d_path;
+                    req=id;
                 }
             }
         }
     }
-    active[ans]=0;
 
-    for(int v=ans;v!=-1;v=p[v]){
-        re[v].erase(re[v].find({{dis[lvl[v]][ans],req},ans}));
-    }
-    return {max(tm+d,req+d),ans};
+    cur_node=ar[req];
+    active[cur_node]=0;
+    somoy=max(somoy,memo[req])+d;
+    return ;
 }
 
 int ii,n;
@@ -103,34 +107,35 @@ void solve()
     int q;
     printf("Case %d:",++ii );
     scanf("%d",&q);
-    vector<pair<ll,int>>v;
+    vector<int>v;
     for(int i=0;i<q;i++){
-        int ti,u;
-        scanf("%d%d",&ti,&u);
-        v.push_back({ti,u});
+        ll ti;
+        int u;
+        scanf("%lld%d",&ti,&u);
+        v.push_back(u);
+        memo[i]=ti;
+        ar[i]=u;
     }
-    int cur_node=1;
-    ll somoy=0;
+    cur_node=1;
+    somoy=0;
     int i=0;
     int available=0;
     while(i<q or available>0){
-        while(i<q and somoy>=v[i].first){
-            update(v[i].second,v[i].first);
-            active[v[i].second]=1;
+        while(i<q and somoy>=memo[i]){
+            update(v[i],i);
+            active[v[i]]=1;
             i++;
             available++; 
         }
         if(available==0 and i<q){
-            update(v[i].second,v[i].first);
-            active[v[i].second]=1;
+            update(v[i],i);
+            active[v[i]]=1;
             i++;
             available++;
         }
         if(available==0)break;
         if(available){
-            pair<ll,int>a=query(cur_node,somoy);
-            cur_node=a.second;
-            somoy=a.first;
+            query(cur_node);
             available--;
             printf(" %d",cur_node );
         }
@@ -138,10 +143,8 @@ void solve()
     printf("\n");
 
     for(i=1;i<=n;i++){
-        active[i]=0;
-        re[i].clear();
+        while(!re[i].empty())re[i].pop();
         g[i].clear();
-        ng[i].clear();
         vis[i]=0;
         sub[i]=0;
         p[i]=0;
